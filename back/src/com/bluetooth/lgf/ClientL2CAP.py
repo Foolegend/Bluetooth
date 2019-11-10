@@ -1,6 +1,6 @@
-import bluetooth
+from bluetooth import *
 
-sock = bluetooth.BluetoothSocket(bluetooth.L2CAP)
+sock = BluetoothSocket(L2CAP)
 
 bd_addr = "01:23:45:67:89:AB"
 port = 0x1001

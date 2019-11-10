@@ -1,6 +1,6 @@
-import bluetooth
+from bluetooth import *
 
-server_sock = bluetooth.BluetoothSocket(bluetooth.L2CAP)
+server_sock = BluetoothSocket(L2CAP)
 
 port = 0x1001
 server_sock.bind(("", port))

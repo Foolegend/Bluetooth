@@ -1,10 +1,10 @@
-import bluetooth
+from bluetooth import *
 
-nearby_devices = bluetooth.discover_devices(lookup_names=True)
+nearby_devices = discover_devices(lookup_names=True)
 for addr, name in nearby_devices:
     print("  %s - %s" % (addr, name))
 
-    services = bluetooth.find_service(address=addr)
+    services = find_service(address=addr)
     for svc in services:
         print("Service Name: %s" % svc["name"])
         print("    Host:        %s" % svc["host"])
