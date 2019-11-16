@@ -20,8 +20,10 @@ import android.widget.ListView;
 import com.example.lgf.bluetooth.base.BlueToothController;
 import com.example.lgf.bluetooth.base.DeviceAdapter;
 import com.example.lgf.bluetooth.client.ClientThread;
+import com.example.lgf.bluetooth.client.handler.ClientMsgHandler;
 import com.example.lgf.bluetooth.server.ServerSocketThread;
-import com.example.lgf.bluetooth.server.handler.MsgHandler;
+import com.example.lgf.bluetooth.server.handler.ServerMsgHandler;
+import com.example.lgf.bluetooth.util.Constant;
 import com.example.lgf.bluetooth.util.Utils;
 
 import java.io.UnsupportedEncodingException;
@@ -32,7 +34,8 @@ public class MainActivity extends AppCompatActivity {
     private List<BluetoothDevice> allDeviceList = new ArrayList<BluetoothDevice>();
     private List<BluetoothDevice> hasBondedDeviceList = new ArrayList<BluetoothDevice>();
     private BlueToothController blueToothController = new BlueToothController();
-    private Handler msgHandler = new MsgHandler(this);
+    private Handler serverMsgHandler = new ServerMsgHandler(this);
+    private Handler clientMsgHandler = new ClientMsgHandler(this);
 
     public static final int REQUEST_CODE = 0;
     private DeviceAdapter deviceAdapter;
@@ -132,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
             if (client != null) {
                 client.cancel();
             }
-            client = new ClientThread(device, blueToothController.getAdapter(), msgHandler);
+            client = new ClientThread(device, blueToothController.getAdapter(), clientMsgHandler);
             client.start();
         }
     };
@@ -179,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
             if( server != null) {
                 server.cancel();
             }
-            server = new ServerSocketThread(blueToothController.getAdapter(), msgHandler);
+            server = new ServerSocketThread(blueToothController.getAdapter(), serverMsgHandler);
             server.start();
         } else if( id == R.id.stop_listening) {
             if( server != null) {
@@ -202,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
     private void say(String word) {
         if (server != null) {
             try {
-                server.sendData(word.getBytes("utf-8"));
+                server.sendData(word.getBytes(Constant.ENCODE));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
@@ -210,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
 
         else if( client != null) {
             try {
-                client.sendData(word.getBytes("utf-8"));
+                client.sendData(word.getBytes(Constant.ENCODE));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }

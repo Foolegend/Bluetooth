@@ -1,4 +1,4 @@
-package com.example.lgf.bluetooth.server.handler;
+package com.example.lgf.bluetooth.client.handler;
 
 import android.os.Handler;
 import android.os.Message;
@@ -7,9 +7,9 @@ import com.example.lgf.bluetooth.MainActivity;
 import com.example.lgf.bluetooth.util.Constant;
 import com.example.lgf.bluetooth.util.Utils;
 
-public class MsgHandler extends Handler {
+public class ClientMsgHandler extends Handler {
     private MainActivity mainActivity;
-    public MsgHandler(MainActivity mainActivity){
+    public ClientMsgHandler(MainActivity mainActivity){
         this.mainActivity = mainActivity;
 
     }

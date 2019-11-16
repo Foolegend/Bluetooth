@@ -19,14 +19,15 @@ public class ServerSocketThread extends Thread {
 
     private final BluetoothServerSocket mmServerSocket;
     private final BluetoothAdapter mBluetoothAdapter;
-    private final Handler msgHandler;
-    private SocketStreamManagerThread soketStreamManager;
+    private final Handler serverMsgHandler;
+    private ServerSocketStream soketStreamManager;
 
     public ServerSocketThread(BluetoothAdapter adapter, Handler handler) {
         // 使用一个临时对象，该对象稍后被分配给mmServerSocket，因为mmServerSocket是最终的
         mBluetoothAdapter = adapter;
-        msgHandler = handler;
+        serverMsgHandler = handler;
         BluetoothServerSocket tmp = null;
+
         try {
             // MY_UUID是应用程序的UUID，客户端代码使用相同的UUID
             tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
@@ -39,10 +40,10 @@ public class ServerSocketThread extends Thread {
         //持续监听，直到出现异常或返回socket
         while (true) {
             try {
-                msgHandler.sendEmptyMessage(Constant.MSG_START_LISTENING);
+                serverMsgHandler.sendEmptyMessage(Constant.MSG_START_LISTENING);
                 socket = mmServerSocket.accept();
             } catch (IOException e) {
-                msgHandler.sendMessage(msgHandler.obtainMessage(Constant.MSG_ERROR, e));
+                serverMsgHandler.sendMessage(serverMsgHandler.obtainMessage(Constant.MSG_ERROR, e));
                 break;
             }
             // 如果一个连接被接受
@@ -51,7 +52,7 @@ public class ServerSocketThread extends Thread {
                 manageConnectedSocket(socket);
                 try {
                     mmServerSocket.close();
-                    msgHandler.sendEmptyMessage(Constant.MSG_FINISH_LISTENING);
+                    serverMsgHandler.sendEmptyMessage(Constant.MSG_FINISH_LISTENING);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -65,8 +66,8 @@ public class ServerSocketThread extends Thread {
         if( soketStreamManager != null) {
             soketStreamManager.cancel();
         }
-        msgHandler.sendEmptyMessage(Constant.MSG_GOT_A_CLINET);
-        soketStreamManager = new SocketStreamManagerThread(socket, msgHandler);
+        serverMsgHandler.sendEmptyMessage(Constant.MSG_GOT_A_CLINET);
+        soketStreamManager = new ServerSocketStream(socket, serverMsgHandler);
         soketStreamManager.start();
     }
 
@@ -76,7 +77,7 @@ public class ServerSocketThread extends Thread {
     public void cancel() {
         try {
             mmServerSocket.close();
-            msgHandler.sendEmptyMessage(Constant.MSG_FINISH_LISTENING);
+            serverMsgHandler.sendEmptyMessage(Constant.MSG_FINISH_LISTENING);
         } catch (IOException e) { }
     }
 

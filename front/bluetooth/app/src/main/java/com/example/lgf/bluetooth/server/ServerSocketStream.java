@@ -11,17 +11,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class SocketStreamManagerThread extends Thread {
+public class ServerSocketStream extends Thread {
     private final BluetoothSocket mmSocket;
     private final InputStream mmInStream;
     private final OutputStream mmOutStream;
-    private final Handler msgHandler;
+    private final Handler serverMsgHandler;
 
-    public SocketStreamManagerThread(BluetoothSocket socket, Handler handler) {
+    public ServerSocketStream(BluetoothSocket socket, Handler handler) {
         mmSocket = socket;
         InputStream tmpIn = null;
         OutputStream tmpOut = null;
-        msgHandler = handler;
+        serverMsgHandler = handler;
         // 使用临时对象获取输入和输出流，因为成员流是最终的
         try {
             tmpIn = socket.getInputStream();
@@ -40,17 +40,17 @@ public class SocketStreamManagerThread extends Thread {
         // 持续监听InputStream，直到出现异常
         while (true) {
             try {
-                mmOutStream.write("kkk".getBytes());
                 // 从InputStream读取数据
                 bytes = mmInStream.read(buffer);
                 // 将获得的bytes发送到UI层activity
                 if( bytes >0) {
-                    Message message = msgHandler.obtainMessage(Constant.MSG_GOT_DATA, new String(buffer, 0, bytes, "utf-8"));
-                    msgHandler.sendMessage(message);
+                    Message message = serverMsgHandler.obtainMessage(Constant.MSG_GOT_DATA, new String(buffer, 0, bytes, Constant.ENCODE));
+                    System.out.println(new String(buffer, 0, bytes, Constant.ENCODE));
+                    serverMsgHandler.sendMessage(message);
                 }
                 Log.d("GOTMSG", "message size" + bytes);
             } catch (IOException e) {
-                msgHandler.sendMessage(msgHandler.obtainMessage(Constant.MSG_ERROR, e));
+                serverMsgHandler.sendMessage(serverMsgHandler.obtainMessage(Constant.MSG_ERROR, e));
                 break;
             }
         }

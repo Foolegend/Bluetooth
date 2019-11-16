@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 
-import com.example.lgf.bluetooth.server.SocketStreamManagerThread;
 import com.example.lgf.bluetooth.util.Constant;
 
 import java.io.IOException;
@@ -16,14 +15,14 @@ public class ClientThread extends Thread {
     private static final UUID MY_UUID = UUID.fromString(Constant.CONNECTTION_UUID);
     private final BluetoothSocket clientSocket;
     private BluetoothAdapter mBluetoothAdapter;
-    private final Handler msgHandler;
-    private SocketStreamManagerThread socketStreamManager;
+    private final Handler clientMsgHandler;
+    private ClientSocketStream clientSocketStream;
 
     public ClientThread(BluetoothDevice device, BluetoothAdapter adapter, Handler handler) {
         // U将一个临时对象分配给mmSocket，因为mmSocket是最终的
         BluetoothSocket tmp = null;
         mBluetoothAdapter = adapter;
-        msgHandler = handler;
+        clientMsgHandler = handler;
         // 用BluetoothSocket连接到给定的蓝牙设备
         try {
             // MY_UUID是应用程序的UUID，客户端代码使用相同的UUID
@@ -40,7 +39,7 @@ public class ClientThread extends Thread {
             // 通过socket连接设备，阻塞运行直到成功或抛出异常时
             clientSocket.connect();
         } catch (Exception connectException) {
-            msgHandler.sendMessage(msgHandler.obtainMessage(Constant.MSG_ERROR, connectException));
+            clientMsgHandler.sendMessage(clientMsgHandler.obtainMessage(Constant.MSG_ERROR, connectException));
             // 如果无法连接则关闭socket并退出
             try {
                 clientSocket.close();
@@ -51,10 +50,10 @@ public class ClientThread extends Thread {
         manageConnectedSocket(clientSocket);
     }
 
-    private void manageConnectedSocket(BluetoothSocket mmSocket) {
-        msgHandler.sendEmptyMessage(Constant.MSG_CONNECTED_TO_SERVER);
-        socketStreamManager = new SocketStreamManagerThread(mmSocket, msgHandler);
-        socketStreamManager.start();
+    private void manageConnectedSocket(BluetoothSocket clientSocket) {
+        clientMsgHandler.sendEmptyMessage(Constant.MSG_CONNECTED_TO_SERVER);
+        clientSocketStream = new ClientSocketStream(clientSocket, clientMsgHandler);
+        clientSocketStream.start();
     }
 
     /**
@@ -70,8 +69,8 @@ public class ClientThread extends Thread {
      * 发送数据
      */
     public void sendData(byte[] data) {
-        if( socketStreamManager !=null){
-            socketStreamManager.write(data);
+        if( clientSocketStream !=null){
+            clientSocketStream.write(data);
         }
     }
 }
